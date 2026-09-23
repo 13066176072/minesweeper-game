@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>扫雷 · 皮肤商店</title>
+<style>
+/* ---------- 主题变量（用 [data-theme] 而不是 body[...]，这样商店里的小预览也能套同一套色） ---------- */
+[data-theme="classic"]{
+  --page:#e9e9ee; --surface:#c0c0c0; --panel:#c0c0c0;
+  --cell-closed:#bdbdbd; --cell-open:#d6d6d6; --edge-hi:#ffffff; --edge-lo:#7f7f7f;
+  --text:#111111; --accent:#1d4ed8;
+  --n1:#0000ff; --n2:#008000; --n3:#ff0000; --n4:#000080;
+  --n5:#800000; --n6:#008080; --n7:#000000; --n8:#808080;
+}
+/* 甜梦马卡龙：奶油粉 · 软糖圆角 */
+[data-theme="sweet"]{
+  --page:#fff4f9; --surface:#ffe8f2; --panel:#ffd6ea;
+  --cell-closed:#ffb3d1; --cell-bg:linear-gradient(160deg,#ffd4e9,#ff9ec4);
+  --cell-open:#fff9fc; --edge-hi:#ffe1ef; --edge-lo:#e078a5;
+  --text:#6b2b47; --accent:#ff5fa2;
+  --n1:#7c5cff; --n2:#12996f; --n3:#ff4d6d; --n4:#a855f7;
+  --n5:#d94f7c; --n6:#1f9a8c; --n7:#6b2b47; --n8:#a48fa0;
+  --cell-radius:9px; --cell-bw:3px;
+}
+/* 暗黑机械：金属拉丝 · 橙色警示 */
+[data-theme="mecha"]{
+  --page:#0e1116; --surface:#171d26; --panel:#1e2630;
+  --cell-closed:#39424f; --cell-bg:linear-gradient(160deg,#4b5666,#28303b);
+  --cell-open:#0f141a; --edge-hi:#5d6877; --edge-lo:#04060a;
+  --text:#c9d4e3; --accent:#ff8a3d;
+  --n1:#5b9dff; --n2:#3ddc84; --n3:#ff5c5c; --n4:#b08bff;
+  --n5:#ffb03a; --n6:#33d6d6; --n7:#dbe4f0; --n8:#7d8899;
+  --cell-radius:2px; --cell-bw:3px;
+}
+/* 赛博霓虹：紫黑底 · 荧光描边 */
+[data-theme="cyber"]{
+  --page:#0f0618; --surface:#1a0b2e; --panel:#251042;
+  --cell-closed:#3b1c6b; --cell-bg:linear-gradient(160deg,#52278c,#2a1150);
+  --cell-open:#150825; --edge-hi:#7c3aed; --edge-lo:#08030f;
+  --text:#e9d5ff; --accent:#22d3ee;
+  --n1:#22d3ee; --n2:#4ade80; --n3:#ff2d95; --n4:#a78bfa;
+  --n5:#fbbf24; --n6:#38bdf8; --n7:#f0abfc; --n8:#94a3b8;
+  --cell-radius:3px; --cell-bw:2px;
+  --num-glow:0 0 7px currentColor; --cell-glow:inset 0 0 8px rgba(124,58,237,.35);
+}
+/* 复古像素：GameBoy 绿 · 8-bit 方块 */
+[data-theme="pixel"]{
+  --page:#e8e3d0; --surface:#dcd5be; --panel:#c4bba2;
+  --cell-closed:#6b8f4e; --cell-open:#cbc9ab; --edge-hi:#9dc172; --edge-lo:#3b5729;
+  --text:#2b2b1d; --accent:#b45309;
+  --n1:#1d4ed8; --n2:#166534; --n3:#b91c1c; --n4:#4c1d95;
+  --n5:#7c2d12; --n6:#0e7490; --n7:#2b2b1d; --n8:#57534e;
+  --cell-radius:0px; --cell-bw:4px;
+}
+/* 水墨中国风：宣纸留白 · 朱砂落款 */
+[data-theme="zen"]{
+  --page:#f5f2ea; --surface:#e9e4d9; --panel:#ddd7c8;
+  --cell-closed:#b6bcb2; --cell-open:#faf7f0; --edge-hi:#e6e2d6; --edge-lo:#6e736a;
+  --text:#23211d; --accent:#b03a2e;
+  --n1:#2f5d8a; --n2:#3f6b4a; --n3:#b03a2e; --n4:#4b3f72;
+  --n5:#8a5a2b; --n6:#40707a; --n7:#23211d; --n8:#6b6b63;
+  --cell-radius:1px; --cell-bw:2px;
+}
+
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--page);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:26px 14px 50px;
+  transition:background .25s,color .25s;
+  --cell-radius:0px; --cell-bw:3px; --cell-bg:none; --num-glow:none; --cell-glow:none}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+.tip{font-size:12.5px;opacity:.72;margin:0 0 18px}
+
+.machine{background:var(--surface);border-radius:14px;padding:14px;
+  border:1px solid var(--edge-lo);transition:background .25s,box-shadow .25s}
+[data-theme="sweet"] .machine{box-shadow:0 8px 22px rgba(255,105,162,.22)}
+[data-theme="cyber"] .machine{box-shadow:0 0 26px rgba(124,58,237,.35)}
+[data-theme="mecha"] .machine{background-image:linear-gradient(180deg,#1e2630,#11161d);
+  box-shadow:0 6px 18px rgba(0,0,0,.6)}
+[data-theme="zen"] .machine{border-color:#b9b2a2;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--panel);border-radius:10px;padding:9px 12px;margin-bottom:12px;
+  border-top:2px solid var(--edge-hi);border-left:2px solid var(--edge-hi);
+  border-right:2px solid var(--edge-lo);border-bottom:2px solid var(--edge-lo)}
+select,button{font-family:inherit;font-size:13px;color:var(--text);
+  background:var(--surface);border:1px solid var(--edge-lo);border-radius:7px;
+  padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:disabled{cursor:not-allowed;opacity:.5;border-color:var(--edge-lo);color:var(--text)}
+.lcd{font-family:"SFMono-Regular",Consolas,monospace;font-size:19px;font-weight:700;
+  background:#1a1a1a;color:#ff3b30;padding:2px 9px;border-radius:5px;min-width:56px;text-align:center;
+  letter-spacing:1px}
+.face{font-size:22px;line-height:1;background:var(--surface);padding:4px 10px}
+.spacer{flex:1}
+.coins{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;
+  background:var(--surface);border:1px solid var(--edge-lo);border-radius:999px;padding:4px 11px}
+.coins b{color:var(--accent);font-size:14px}
+.coins.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.22)}100%{transform:scale(1)}}
+
+.skins{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.skins span{font-size:12.5px;opacity:.75}
+.sw{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+  padding:0;outline:none;font-size:14px;line-height:1;display:inline-flex;
+  align-items:center;justify-content:center}
+.sw.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.sw.lock{filter:grayscale(.85);opacity:.55}
+
+.board-wrap{overflow:auto;max-width:100%;padding:4px}
+.board{display:grid;gap:0;background:var(--edge-lo);width:max-content;margin:0 auto}
+.cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--cell) * .55);font-weight:700;line-height:1;user-select:none;cursor:pointer;
+  background-color:var(--cell-closed);background-image:var(--cell-bg);color:var(--text);
+  border-style:solid;border-width:var(--cell-bw);
+  border-top-color:var(--edge-hi);border-left-color:var(--edge-hi);
+  border-right-color:var(--edge-lo);border-bottom-color:var(--edge-lo);
+  border-radius:var(--cell-radius);
+  text-shadow:var(--num-glow);
+  transition:background-color .12s}
+.cell.open{background-color:var(--cell-open);background-image:none;
+  border:1px solid var(--edge-lo);font-size:calc(var(--cell) * .58);
+  box-shadow:var(--cell-glow)}
+.cell.open.n1{color:var(--n1)} .cell.open.n2{color:var(--n2)}
+.cell.open.n3{color:var(--n3)} .cell.open.n4{color:var(--n4)}
+.cell.open.n5{color:var(--n5)} .cell.open.n6{color:var(--n6)}
+.cell.open.n7{color:var(--n7)} .cell.open.n8{color:var(--n8)}
+.cell.boom{background:#ef4444}
+.cell.wrong{background:#fde68a}
+[data-theme="pixel"] .cell{font-family:"Courier New",monospace}
+[data-theme="mecha"] .cell{font-family:"Consolas",monospace}
+
+.status{margin-top:12px;font-size:13.5px;min-height:20px;opacity:.85}
+.legend{margin-top:16px;font-size:12.5px;opacity:.7;text-align:center;line-height:1.8}
+
+/* ---------- 皮肤商店 ---------- */
+.mask{position:fixed;inset:0;background:rgba(10,10,14,.55);opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:40}
+.mask.show{opacity:1;pointer-events:auto}
+.shop{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);
+  width:min(560px,92vw);max-height:84vh;overflow:auto;z-index:41;
+  background:var(--surface);color:var(--text);border:1px solid var(--edge-lo);
+  border-radius:16px;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.shop.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.shop-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.shop-head h2{font-size:18px;margin:0;flex:1}
+.x{font-size:15px;padding:4px 9px}
+.shop-tip{font-size:12.5px;opacity:.75;margin:0 0 14px;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--edge-lo);border-radius:12px;
+  padding:11px;display:flex;flex-direction:column;gap:8px}
+.card.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.prev{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:4px;
+  background:var(--edge-lo);border-radius:6px}
+.prev i{height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;background-color:var(--cell-closed);
+  background-image:var(--cell-bg);border-radius:calc(var(--cell-radius) * .6);
+  border:1px solid var(--edge-hi);font-style:normal}
+.prev i.o{background-color:var(--cell-open);background-image:none;border-color:var(--edge-lo)}
+.prev i.c1{color:var(--n1)} .prev i.c2{color:var(--n2)} .prev i.c3{color:var(--n3)}
+.nm{font-size:13.5px;font-weight:700}
+.ds{font-size:11.5px;opacity:.7;line-height:1.5}
+.card .row{display:flex;align-items:center;gap:8px;margin-top:auto}
+.price{font-size:12px;font-weight:700;color:var(--accent);flex:1}
+.price.dim{color:inherit;opacity:.6;font-weight:400}
+.shop-foot{margin-top:14px;font-size:11.5px;opacity:.6;text-align:center;line-height:1.7}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);
+  background:rgba(18,18,22,.94);color:#fff;padding:10px 16px;border-radius:10px;
+  font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:60;
+  max-width:86vw;text-align:center;line-height:1.6}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body data-theme="classic">
+
+<h1>扫雷</h1>
+<p class="tip">左键翻开 · 右键标旗 · 在数字上双击（或中键）自动展开周围 · 手机长按标旗</p>
+
+<div class="machine">
+  <div class="toolbar">
+    <select id="level">
+      <option value="easy">初级 9×9 · 10 雷</option>
+      <option value="mid">中级 16×16 · 40 雷</option>
+      <option value="hard">高级 30×16 · 99 雷</option>
+    </select>
+    <button id="restart">重开</button>
+    <button id="flagMode">🚩 标记模式</button>
+    <span class="spacer"></span>
+    <span class="coins" id="coinsBar">💰 <b id="points">0</b></span>
+    <button id="shopBtn">🛍 皮肤商店</button>
+    <span class="lcd" id="mineLeft">010</span>
+    <button class="face" id="face" title="重新开始">🙂</button>
+    <span class="lcd" id="timer">000</span>
+  </div>
+
+  <div class="skins">
+    <span>皮肤：</span>
+    <span id="swRow" style="display:flex;gap:8px;flex-wrap:wrap"></span>
+    <button id="shopBtn2" style="font-size:12px;padding:3px 9px">全部皮肤 ›</button>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board" style="--cell:38px"></div>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<p class="legend">
+  首次点击永远不会踩雷 · 剩余雷数 = 总雷数 − 已插旗<br>
+  赢一局赚积分：初级 12 / 中级 30 / 高级 60 分基础分，用时越短额外奖励越多<br>
+  积分和已购皮肤存在本机浏览器里，换设备或清缓存会清空
+</p>
+
+<div class="mask" id="mask"></div>
+<div class="shop" id="shop">
+  <div class="shop-head">
+    <h2>🛍 皮肤商店</h2>
+    <span class="coins">💰 <b id="points2">0</b></span>
+    <button class="x" id="shopClose">✕</button>
+  </div>
+  <p class="shop-tip">经典灰永久免费。皮肤买断后永久可用，买了会自动换上。</p>
+  <div class="grid" id="shopGrid"></div>
+  <div class="shop-foot">想要更多积分？难度越高、扫得越快，一局拿得越多。</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var LEVELS = {
+    easy: { w: 9, h: 9, m: 10, cell: 38, base: 12, par: 45 },
+    mid:  { w: 16, h: 16, m: 40, cell: 32, base: 30, par: 150 },
+    hard: { w: 30, h: 16, m: 99, cell: 28, base: 60, par: 400 }
+  };
+
+  var SKINS = [
+    { id:'classic', name:'经典灰', emoji:'🩶', price:0, desc:'最初的 Windows 味道，永久免费',
+      sw:'linear-gradient(135deg,#e2e2e6,#9a9a9a)' },
+    { id:'sweet', name:'甜梦马卡龙', emoji:'🍭', price:100, desc:'奶油粉 · 软糖圆角格子',
+      sw:'linear-gradient(135deg,#ffd4e9,#ff8fb8)' },
+    { id:'mecha', name:'暗黑机械', emoji:'⚙️', price:220, desc:'金属拉丝 · 橙色警示灯',
+      sw:'linear-gradient(135deg,#4b5666,#141a22)' },
+    { id:'cyber', name:'赛博霓虹', emoji:'🌃', price:380, desc:'紫黑底 · 荧光描边数字',
+      sw:'linear-gradient(135deg,#7c3aed,#22d3ee)' },
+    { id:'pixel', name:'复古像素', emoji:'👾', price:560, desc:'GameBoy 绿 · 8-bit 方块',
+      sw:'linear-gradient(135deg,#9dc172,#3b5729)' },
+    { id:'zen', name:'水墨中国风', emoji:'🖌️', price:750, desc:'宣纸留白 · 朱砂落款',
+      sw:'linear-gradient(135deg,#efeade,#6e736a)' }
+  ];
+  var INITIAL_POINTS = 150;
+
+  var board = document.getElementById('board');
+  var mineLeftEl = document.getElementById('mineLeft');
+  var timerEl = document.getElementById('timer');
+  var statusEl = document.getElementById('status');
+  var faceEl = document.getElementById('face');
+  var levelEl = document.getElementById('level');
+  var flagBtn = document.getElementById('flagMode');
+  var pointsEl = document.getElementById('points');
+  var pointsEl2 = document.getElementById('points2');
+  var coinsBar = document.getElementById('coinsBar');
+  var swRow = document.getElementById('swRow');
+  var shopGrid = document.getElementById('shopGrid');
+  var shop = document.getElementById('shop');
+  var mask = document.getElementById('mask');
+  var toastEl = document.getElementById('toast');
+
+  var W, H, MINES, grid, cellEls, started, over, flags, opened, sec, tick;
+  var flagMode = false;
+
+  /* ---------- 存档：积分 / 已购皮肤 / 当前皮肤 ---------- */
+  var state = { points: INITIAL_POINTS, owned: ['classic'], theme: 'classic' };
+
+  function load() {
+    try {
+      var p = localStorage.getItem('ms-points');
+      state.points = (p === null) ? INITIAL_POINTS : (parseInt(p, 10) || 0);
+      var o = localStorage.getItem('ms-owned');
+      if (o) {
+        var arr = JSON.parse(o);
+        if (Object.prototype.toString.call(arr) === '[object Array]' && arr.length) {
+          state.owned = ['classic'];
+          arr.forEach(function (id) { if (state.owned.indexOf(id) < 0) state.owned.push(id); });
+        }
+      }
+      var t = localStorage.getItem('ms-theme');
+      if (t && state.owned.indexOf(t) >= 0) state.theme = t;
+    } catch (e) {}
+  }
+  function save() {
+    try {
+      localStorage.setItem('ms-points', String(state.points));
+      localStorage.setItem('ms-owned', JSON.stringify(state.owned));
+      localStorage.setItem('ms-theme', state.theme);
+    } catch (e) {}
+  }
+  function owns(id) { return state.owned.indexOf(id) >= 0; }
+  function skinById(id) {
+    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) return SKINS[i];
+    return SKINS[0];
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  function renderPoints(pop) {
+    pointsEl.textContent = String(state.points);
+    pointsEl2.textContent = String(state.points);
+    if (pop) {
+      coinsBar.classList.remove('pop');
+      void coinsBar.offsetWidth;
+      coinsBar.classList.add('pop');
+    }
+  }
+
+  function addPoints(n) {
+    state.points += n;
+    save();
+    renderPoints(true);
+    renderShop();
+  }
+
+  function applyTheme(id) {
+    state.theme = id;
+    document.body.setAttribute('data-theme', id);
+    save();
+    renderSkins();
+    renderShop();
+  }
+
+  function buy(id) {
+    var s = skinById(id);
+    if (owns(id)) { applyTheme(id); return; }
+    if (state.points < s.price) {
+      toast('还差 ' + (s.price - state.points) + ' 分才能买「' + s.name + '」');
+      return;
+    }
+    state.points -= s.price;
+    state.owned.push(id);
+    save();
+    renderPoints(true);
+    applyTheme(id);
+    toast('🎉 解锁「' + s.name + '」并已换上，剩余 ' + state.points + ' 分');
+  }
+
+  /* ---------- 皮肤快捷条 ---------- */
+  function renderSkins() {
+    swRow.innerHTML = '';
+    SKINS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'sw' + (state.theme === s.id ? ' sel' : '') + (owns(s.id) ? '' : ' lock');
+      b.style.background = s.sw;
+      b.title = s.name + (owns(s.id) ? '' : ' · 需要 ' + s.price + ' 分');
+      b.textContent = owns(s.id) ? s.emoji : '🔒';
+      b.addEventListener('click', function () {
+        if (owns(s.id)) applyTheme(s.id);
+        else { toast('「' + s.name + '」需要 ' + s.price + ' 分，去商店看看'); openShop(); }
+      });
+      swRow.appendChild(b);
+    });
+  }
+
+  /* ---------- 商店面板 ---------- */
+  var PREVIEW = [
+    { c:'o c1', t:'1' }, { c:'', t:'' },        { c:'o c2', t:'2' },
+    { c:'', t:'' },      { c:'o c3', t:'3' },   { c:'', t:'' },
+    { c:'', t:'' },      { c:'', t:'' },        { c:'', t:'🚩' }
+  ];
+  function previewHTML() {
+    return PREVIEW.map(function (p) {
+      return '<i class="' + p.c + '">' + p.t + '</i>';
+    }).join('');
+  }
+
+  function renderShop() {
+    shopGrid.innerHTML = '';
+    SKINS.forEach(function (s) {
+      var owned = owns(s.id);
+      var cur = state.theme === s.id;
+      var card = document.createElement('div');
+      card.className = 'card' + (cur ? ' cur' : '');
+
+      var btnLabel, disabled = false;
+      if (cur) { btnLabel = '使用中'; disabled = true; }
+      else if (owned) { btnLabel = '使用'; }
+      else if (state.points >= s.price) { btnLabel = '购买'; }
+      else { btnLabel = '差 ' + (s.price - state.points) + ' 分'; disabled = true; }
+
+      card.innerHTML =
+        '<div class="prev" data-theme="' + s.id + '">' + previewHTML() + '</div>' +
+        '<div><div class="nm">' + s.emoji + ' ' + s.name + '</div>' +
+        '<div class="ds">' + s.desc + '</div></div>' +
+        '<div class="row"><span class="price' + (owned && !s.price ? ' dim' : '') + '">' +
+        (s.price ? s.price + ' 分' : '永久免费') + '</span>' +
+        '<button' + (disabled ? ' disabled' : '') + '>' + btnLabel + '</button></div>';
+
+      var btn = card.querySelector('button');
+      btn.addEventListener('click', function () { buy(s.id); });
+      shopGrid.appendChild(card);
+    });
+    pointsEl2.textContent = String(state.points);
+  }
+
+  function openShop() { renderShop(); shop.classList.add('show'); mask.classList.add('show'); }
+  function closeShop() { shop.classList.remove('show'); mask.classList.remove('show'); }
+  document.getElementById('shopBtn').addEventListener('click', openShop);
+  document.getElementById('shopBtn2').addEventListener('click', openShop);
+  document.getElementById('shopClose').addEventListener('click', closeShop);
+  mask.addEventListener('click', closeShop);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeShop(); });
+
+  /* ---------- 游戏主逻辑 ---------- */
+  function pad(n) {
+    if (n < 0) return '-' + (Math.abs(n) < 10 ? '0' + Math.abs(n) : String(Math.abs(n)));
+    return (n < 100 ? (n < 10 ? '00' : '0') : '') + n;
+  }
+
+  function idx(x, y) { return y * W + x; }
+  function neighbors(i) {
+    var x = i % W, y = (i - x) / W, out = [];
+    for (var dy = -1; dy <= 1; dy++) {
+      for (var dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        var nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < W && ny >= 0 && ny < H) out.push(idx(nx, ny));
+      }
+    }
+    return out;
+  }
+
+  function newGame() {
+    var L = LEVELS[levelEl.value];
+    W = L.w; H = L.h; MINES = L.m;
+    board.style.setProperty('--cell', L.cell + 'px');
+    board.style.gridTemplateColumns = 'repeat(' + W + ', var(--cell))';
+
+    grid = [];
+    cellEls = [];
+    board.innerHTML = '';
+    for (var i = 0; i < W * H; i++) {
+      grid.push({ mine: false, open: false, flag: false, adj: 0 });
+      var d = document.createElement('div');
+      d.className = 'cell';
+      d.dataset.i = String(i);
+      board.appendChild(d);
+      cellEls.push(d);
+    }
+
+    started = false; over = false; flags = 0; opened = 0; sec = 0;
+    if (tick) { clearInterval(tick); tick = null; }
+    mineLeftEl.textContent = pad(MINES);
+    timerEl.textContent = '000';
+    statusEl.textContent = '';
+    faceEl.textContent = '🙂';
+  }
+
+  function placeMines(safe) {
+    var banned = {};
+    banned[safe] = true;
+    neighbors(safe).forEach(function (n) { banned[n] = true; });
+    var pool = [];
+    for (var i = 0; i < W * H; i++) if (!banned[i]) pool.push(i);
+    for (var k = 0; k < MINES && pool.length; k++) {
+      var p = Math.floor(Math.random() * pool.length);
+      grid[pool[p]].mine = true;
+      pool.splice(p, 1);
+    }
+    for (var j = 0; j < W * H; j++) {
+      if (grid[j].mine) continue;
+      grid[j].adj = neighbors(j).filter(function (n) { return grid[n].mine; }).length;
+    }
+  }
+
+  function paint(i) {
+    var c = grid[i], el = cellEls[i];
+    el.className = 'cell';
+    el.textContent = '';
+    if (c.flag && !c.open) { el.textContent = '🚩'; return; }
+    if (!c.open) return;
+    el.classList.add('open');
+    if (c.mine) { el.textContent = '💣'; return; }
+    if (c.adj) { el.textContent = String(c.adj); el.classList.add('n' + c.adj); }
+  }
+
+  function reveal(i) {
+    if (over || grid[i].open || grid[i].flag) return;
+    if (!started) { started = true; placeMines(i); startTimer(); }
+    if (grid[i].mine) { boom(i); return; }
+
+    var stack = [i];
+    while (stack.length) {
+      var cur = stack.pop();
+      if (grid[cur].open || grid[cur].flag) continue;
+      grid[cur].open = true; opened++;
+      paint(cur);
+      if (grid[cur].adj === 0) {
+        neighbors(cur).forEach(function (n) {
+          if (!grid[n].open && !grid[n].mine) stack.push(n);
+        });
+      }
+    }
+    checkWin();
+  }
+
+  function chord(i) {
+    if (over || !grid[i].open || !grid[i].adj) return;
+    var ns = neighbors(i);
+    var f = ns.filter(function (n) { return grid[n].flag; }).length;
+    if (f !== grid[i].adj) return;
+    ns.forEach(function (n) { if (!grid[n].flag) reveal(n); });
+  }
+
+  function toggleFlag(i) {
+    if (over || grid[i].open) return;
+    grid[i].flag = !grid[i].flag;
+    flags += grid[i].flag ? 1 : -1;
+    mineLeftEl.textContent = pad(Math.max(-99, MINES - flags));
+    paint(i);
+  }
+
+  function startTimer() {
+    tick = setInterval(function () {
+      if (over || sec >= 999) return;
+      sec++;
+      timerEl.textContent = pad(sec);
+    }, 1000);
+  }
+
+  function gainOf(won) {
+    var L = LEVELS[levelEl.value];
+    if (!won) return Math.min(5, Math.floor(opened / 15));
+    var speed = Math.max(0, Math.round((L.par - sec) / 4));
+    return { total: L.base + speed, base: L.base, speed: speed };
+  }
+
+  function finish(won) {
+    over = true;
+    if (tick) { clearInterval(tick); tick = null; }
+    for (var i = 0; i < W * H; i++) {
+      if (grid[i].mine && !grid[i].flag && !won) { grid[i].open = true; paint(i); }
+      if (grid[i].mine && won) { grid[i].flag = true; paint(i); }
+      if (grid[i].flag && !grid[i].mine) { cellEls[i].classList.add('wrong'); cellEls[i].textContent = '❌'; }
+    }
+
+    var msg;
+    if (won) {
+      faceEl.textContent = '😎';
+      mineLeftEl.textContent = '000';
+      var g = gainOf(true);
+      msg = '扫雷成功！用时 ' + sec + ' 秒 · 积分 +' + g.total +
+            '（基础 ' + g.base + (g.speed ? ' + 速度奖励 ' + g.speed : '') + '）';
+      addPoints(g.total);
+    } else {
+      faceEl.textContent = '😵';
+      cellEls.forEach(function (el, i) { if (grid[i].mine) el.classList.add('boom'); });
+      var c = gainOf(false);
+      msg = '踩雷了，点笑脸或「重开」再来一局' + (c ? ' · 安慰分 +' + c : '');
+      if (c) addPoints(c);
+    }
+    statusEl.textContent = msg;
+  }
+
+  function boom(i) {
+    grid[i].open = true;
+    paint(i);
+    finish(false);
+  }
+
+  function checkWin() {
+    if (opened === W * H - MINES) finish(true);
+  }
+
+  var suppressClick = false;
+
+  board.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('.cell') : null;
+    if (!el || over) return;
+    if (suppressClick) { suppressClick = false; return; }
+    var i = +el.dataset.i;
+    if (flagMode) toggleFlag(i);
+    else chord(i) || reveal(i);
+  });
+
+  board.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    var el = e.target.closest ? e.target.closest('.cell') : null;
+    if (!el || over) return;
+    toggleFlag(+el.dataset.i);
+  });
+
+  board.addEventListener('mousedown', function (e) {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    var el = e.target.closest ? e.target.closest('.cell') : null;
+    if (el && !over) chord(+el.dataset.i);
+  });
+
+  board.addEventListener('dblclick', function (e) {
+    var el = e.target.closest ? e.target.closest('.cell') : null;
+    if (el && !over) chord(+el.dataset.i);
+  });
+
+  var pressTimer = null;
+  board.addEventListener('touchstart', function (e) {
+    var el = e.target.closest ? e.target.closest('.cell') : null;
+    if (!el || over) return;
+    var i = +el.dataset.i;
+    pressTimer = setTimeout(function () {
+      pressTimer = null;
+      suppressClick = true;
+      toggleFlag(i);
+      if (navigator.vibrate) navigator.vibrate(20);
+    }, 400);
+  }, { passive: true });
+
+  board.addEventListener('touchend', function () {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  });
+  board.addEventListener('touchmove', function () {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  });
+
+  board.addEventListener('mousedown', function () { if (!over) faceEl.textContent = '😮'; });
+  document.addEventListener('mouseup', function () { if (!over) faceEl.textContent = '🙂'; });
+
+  document.getElementById('restart').addEventListener('click', newGame);
+  faceEl.addEventListener('click', newGame);
+  levelEl.addEventListener('change', newGame);
+  flagBtn.addEventListener('click', function () {
+    flagMode = !flagMode;
+    flagBtn.classList.toggle('on', flagMode);
+  });
+
+  load();
+  applyTheme(state.theme);
+  renderPoints(false);
+  renderSkins();
+  renderShop();
+  newGame();
+})();
+</script>
+</body>
+</html>
